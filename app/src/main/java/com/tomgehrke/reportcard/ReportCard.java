@@ -2,17 +2,18 @@ package com.tomgehrke.reportcard;
 
 /* == Created by Tom Gehrke on 1/18/2017. == */
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ReportCard {
 
     // Stores the reporting period
     private String mReportingPeriod;
 
-    // Store subjects and scores in ArrayLists
-    // (Preference would be a Class class, but that's out of scope for this assignment.
-    private ArrayList<String> mSubjectList = new ArrayList<>();
-    private ArrayList<Integer> mScoreList = new ArrayList<>();
+    private HashMap<String, Integer> mSubjectGrades = new HashMap<>();
 
     // Constructor requires at least the reporting period
     //
@@ -34,63 +35,18 @@ public class ReportCard {
     }
 
     // Add a subject to the report card
-    public boolean addSubject(String subject, int score) {
-
-        // Always add subjects in upper case
-        subject = subject.toUpperCase();
-
-        if (getSubjectIndex(subject) >= 0) {
-            // Subject already exists
-            return false;
-        } else {
-            int indexLastAdded;
-
-            // A subject is added to the list...
-            mSubjectList.add(subject.toUpperCase().trim());
-
-            indexLastAdded = mSubjectList.size() - 1;
-
-            // ...and it's associate score is added at the same index.
-            mScoreList.add(indexLastAdded, score);
-
-            return true;
-        }
-    }
-
-    // Remove a subject from the report card
-    private boolean removeSubject(int i) {
-
-        // Make sure a valid index was passed.
-        if (i < 0) {
-            return false;
-        } else if (i <= mSubjectList.size() - 1) {
-            mSubjectList.remove(i);
-            mScoreList.remove(i);
-
-            return true;
-        } else {
-            return false;
-        }
+    public void addSubject(String subject, int score) {
+        mSubjectGrades.put(subject.toUpperCase(), score);
     }
 
     // Remove a subject from the report card by subject
-    public boolean removeSubject(String subject) {
-        return removeSubject(getSubjectIndex(subject));
+    public void removeSubject(String subject) {
+        mSubjectGrades.remove(subject.toUpperCase());
     }
 
     // Returns the total number of subjects on the report card
     public int getSubjectCount() {
-        return mSubjectList.size();
-    }
-
-    // Returns the subject name by index
-    private String getSubject(int i) {
-        return mSubjectList.get(i);
-    }
-
-    // Utility function for the class to get a subject index
-    private int getSubjectIndex(String subject) {
-        return mSubjectList.indexOf(subject.toUpperCase().trim());
+        return mSubjectGrades.size();
     }
 
     // Returns reporting period
@@ -103,49 +59,37 @@ public class ReportCard {
         this.mReportingPeriod = period.toUpperCase();
     }
 
-    // Returns the score of a particular subject by index
-    private int getScore(int i) {
-        return mScoreList.get(i);
-    }
-
     // Returns the score of a particular subject by name
     public int getScore(String subject) {
-
-        // Ultimately still returning subject by index
-        return mScoreList.get(getSubjectIndex(subject));
-    }
-
-    // Set score for subject by index
-    private void setScore(int i, int score) {
-        mScoreList.set(i, score);
+        return mSubjectGrades.get(subject.toUpperCase());
     }
 
     // Set score for subject by subject
     public void setScore(String subject, int score) {
-        setScore(getSubjectIndex(subject), score);
+        mSubjectGrades.put(subject.toUpperCase(), score);
     }
 
     // Returns average of all scores
     public int getAverage() {
         int totalScore = 0;
-        for (int score : mScoreList) {
-            totalScore += score;
+        for (int currentScore : mSubjectGrades.values()) {
+            totalScore += currentScore;
         }
-
-        return totalScore / mScoreList.size();
+        return totalScore / mSubjectGrades.size();
     }
 
     @Override
     public String toString() {
 
-        int subjectCount = getSubjectCount();
         String reportCard = "REPORT CARD FOR PERIOD " + mReportingPeriod + "\n\n";
 
-        if (subjectCount > 0) {
+        if (mSubjectGrades.size() > 0) {
             reportCard += "You are enrolled in the following " + getSubjectCount() + " classes:\n\n";
 
-            for (int i = 0; i < mSubjectList.size(); i++) {
-                reportCard += getSubject(i) + ": " + getScore(i) + "%\n";
+            Iterator subjectIterator = mSubjectGrades.entrySet().iterator();
+            while (subjectIterator.hasNext()) {
+                Map.Entry subjectGrade = (Map.Entry) subjectIterator.next();
+                reportCard += subjectGrade.getKey() + ": " + subjectGrade.getValue() + "%\n";
             }
 
             reportCard += "\nAVERAGE GRADE: " + getAverage() + "%";
